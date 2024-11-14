@@ -5,9 +5,12 @@ import com.rawello.maparserver.repository.NodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -23,17 +26,33 @@ public class NodeController {
     }
 
     @PostMapping
-    public Node createNode(@RequestBody Node node) {
-        return nodeRepository.save(node);
+    public ResponseEntity<Node> createNode(@RequestBody Node node) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || Objects.equals(authentication.getName(), "anonymous")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(nodeRepository.save(node));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteNode(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNode(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || Objects.equals(authentication.getName(), "anonymous")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         nodeRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/api/nodes/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Node> updateNode(@PathVariable Long id, @RequestBody Node node) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || Objects.equals(authentication.getName(), "anonymous")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Optional<Node> existingNode = nodeRepository.findById(id);
         if (existingNode.isPresent()) {
             Node updatedNode = existingNode.get();
