@@ -84,7 +84,7 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + expiration);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", "anonymous");
+        claims.put("sub", "Anonymous");
         claims.put("readOnly", true);
         claims.put("created", now);
 

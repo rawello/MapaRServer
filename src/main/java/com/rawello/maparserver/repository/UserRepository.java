@@ -9,7 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+    @Query("SELECT u FROM User u WHERE u.username = :username")
     User findByUsername(String username);
+
     boolean existsByUsername(String username);
 
     @Modifying

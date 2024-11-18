@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://192.168.58.14:3000")
 @RequestMapping("/api/buildings")
 public class BuildingController {
 
@@ -32,13 +33,11 @@ public class BuildingController {
     @Autowired
     private NodeRepository nodeRepository;
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public List<Building> getAllBuildings() {
         return buildingRepository.findAll();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}/nodes")
     public ResponseEntity<List<Node>> getNodesForBuilding(@PathVariable Long id) {
         Optional<Building> building = buildingRepository.findById(id);
@@ -49,7 +48,6 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping
     public ResponseEntity<Building> createBuilding(@RequestBody Building building) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -63,7 +61,6 @@ public class BuildingController {
 
         return ResponseEntity.ok(buildingRepository.save(building));
     }
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}")
     public ResponseEntity<Building> getBuildingById(@PathVariable Long id) {
         Optional<Building> building = buildingRepository.findById(id);

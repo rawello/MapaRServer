@@ -9,10 +9,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @RestController
+@CrossOrigin(origins = "http://192.168.58.14:3000")
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -40,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/favorites")
-    public ResponseEntity<Void> updateFavorites(@RequestBody List<Long> favoriteBuildings) {
+    public ResponseEntity<String> updateFavorites(@RequestBody List<Long> favoriteBuildings) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -49,11 +51,12 @@ public class UserController {
         try {
             User user = userRepository.findByUsername(authentication.getName());
             user.setFavoriteBuildings(favoriteBuildings);
+            userRepository.updateFavoriteBuildings(user.getId(),favoriteBuildings);
             userRepository.save(user);
-        }catch (Exception ex){
-
+            return ResponseEntity.ok("{\"status\": \"success\"}");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Failed to update favorites\", \"message\":}" + " " + ex.getMessage());
         }
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/favorites")
@@ -64,6 +67,9 @@ public class UserController {
         }
 
         User user = userRepository.findByUsername(authentication.getName());
+        if(user == null) {
+            return ResponseEntity.ok(new ArrayList<Long>());
+        }
         return ResponseEntity.ok(user.getFavoriteBuildings());
     }
 

@@ -14,19 +14,18 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://192.168.58.14:3000")
 @RequestMapping("/api/nodes")
 public class NodeController {
 
     @Autowired
     private NodeRepository nodeRepository;
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public List<Node> getAllNodes() {
         return nodeRepository.findAll();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping
     public ResponseEntity<Node> createNode(@RequestBody Node node) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -37,7 +36,6 @@ public class NodeController {
         return ResponseEntity.ok(nodeRepository.save(node));
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNode(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,7 +47,6 @@ public class NodeController {
         return ResponseEntity.noContent().build();
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
     @PutMapping("/{id}")
     public ResponseEntity<Node> updateNode(@PathVariable Long id, @RequestBody Node node) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
