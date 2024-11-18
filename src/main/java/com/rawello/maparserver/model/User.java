@@ -14,6 +14,11 @@ public class User {
     private String username;
     private String password;
 
+    @ElementCollection
+    @CollectionTable(name = "user_favorites", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "building_id")
+    private List<Long> favoriteBuildings;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Building> buildings;
@@ -48,5 +53,13 @@ public class User {
 
     public void setBuildings(List<Building> buildings) {
         this.buildings = buildings;
+    }
+
+    public List<Long> getFavoriteBuildings() {
+        return favoriteBuildings;
+    }
+
+    public void setFavoriteBuildings(List<Long> favoriteBuildings) {
+        this.favoriteBuildings = favoriteBuildings;
     }
 }

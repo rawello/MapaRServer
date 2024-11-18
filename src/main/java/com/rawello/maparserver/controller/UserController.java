@@ -38,4 +38,39 @@ public class UserController {
 
         return ResponseEntity.ok(userRepository.save(user));
     }
+
+    @PostMapping("/favorites")
+    public ResponseEntity<Void> updateFavorites(@RequestBody List<Long> favoriteBuildings) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            User user = userRepository.findByUsername(authentication.getName());
+            user.setFavoriteBuildings(favoriteBuildings);
+            userRepository.save(user);
+        }catch (Exception ex){
+
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/favorites")
+    public ResponseEntity<List<Long>> getFavorites() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = userRepository.findByUsername(authentication.getName());
+        return ResponseEntity.ok(user.getFavoriteBuildings());
+    }
+
+    @GetMapping("/is-anonymous")
+    public ResponseEntity<Boolean> isAnonymousUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAnonymous = authentication != null && authentication.isAuthenticated() && "anonymous".equals(authentication.getName());
+        return ResponseEntity.ok(isAnonymous);
+    }
 }

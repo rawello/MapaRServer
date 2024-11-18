@@ -32,11 +32,13 @@ public class BuildingController {
     @Autowired
     private NodeRepository nodeRepository;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping
     public List<Building> getAllBuildings() {
         return buildingRepository.findAll();
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}/nodes")
     public ResponseEntity<List<Node>> getNodesForBuilding(@PathVariable Long id) {
         Optional<Building> building = buildingRepository.findById(id);
@@ -47,7 +49,7 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping
     public ResponseEntity<Building> createBuilding(@RequestBody Building building) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -61,7 +63,7 @@ public class BuildingController {
 
         return ResponseEntity.ok(buildingRepository.save(building));
     }
-
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/{id}")
     public ResponseEntity<Building> getBuildingById(@PathVariable Long id) {
         Optional<Building> building = buildingRepository.findById(id);
@@ -86,6 +88,39 @@ public class BuildingController {
             return userRepository.findByUsername((String) principal).getId();
         } else {
             throw new AccessDeniedException("Invalid principal type");
+        }
+    }
+
+    @GetMapping("/{id}/is-owner")
+    public ResponseEntity<Boolean> isBuildingOwner(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.ok(false);
+        }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = userRepository.findByUsername(userDetails.getUsername());
+
+        Optional<Building> building = buildingRepository.findById(id);
+        boolean isOwner = building.isPresent() && building.get().getUser().getId().equals(user.getId());
+        return ResponseEntity.ok(isOwner);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Building> updateBuilding(@PathVariable Long id, @RequestBody Building building) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || Objects.equals(authentication.getName(), "anonymous")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Building> existingBuilding = buildingRepository.findById(id);
+        if (existingBuilding.isPresent()) {
+            Building updatedBuilding = existingBuilding.get();
+            updatedBuilding.setName(building.getName());
+            updatedBuilding.setAddress(building.getAddress());
+            return ResponseEntity.ok(buildingRepository.save(updatedBuilding));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }
