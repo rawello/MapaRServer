@@ -5,11 +5,11 @@ plugins {
 }
 
 group = 'com.rawello.maparserver'
-version = '0.0.1-test'
+version = ''
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(23)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

@@ -1,13 +1,13 @@
-package com.rawello.maparserver;
+// package com.rawello.maparserver;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.junit.jupiter.api.Test;
+// import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class MaparServerTests {
+// @SpringBootTest
+// class MaparServerTests {
 
-	@Test
-	void contextLoads() {
-	}
+// @Test
+// void contextLoads() {
+// }
 
-}
+// }

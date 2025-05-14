@@ -248,7 +248,8 @@
                 nodeToUpdate.neighbors = nodeNeighbors;
                 nodeToUpdate.translation = `${nodeX},${nodeY},${nodeZ}`;
 
-                fetch(`/api/nodes/${nodeId}`, {
+                const buildingId = document.getElementById('buildingId').value;
+                fetch(`/api/building-nodes/${buildingId}/${nodeId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -268,7 +269,8 @@
         function deleteNode() {
             const nodeId = document.getElementById('nodeId').value;
             if (nodeId) {
-                fetch(`/api/nodes/${nodeId}`, {
+                const buildingId = document.getElementById('buildingId').value;
+                fetch(`/api/building-nodes/${buildingId}/${nodeId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
