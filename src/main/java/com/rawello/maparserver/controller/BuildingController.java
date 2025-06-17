@@ -6,6 +6,7 @@ import com.rawello.maparserver.model.User;
 import com.rawello.maparserver.repository.BuildingRepository;
 import com.rawello.maparserver.repository.NodeRepository;
 import com.rawello.maparserver.repository.UserRepository;
+import com.rawello.maparserver.service.BuildingDownloadStatisticService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,13 +26,16 @@ public class BuildingController {
     private final BuildingRepository buildingRepository;
     private final UserRepository userRepository;
     private final NodeRepository nodeRepository;
+    private final BuildingDownloadStatisticService buildingDownloadStatisticService;
 
     public BuildingController(BuildingRepository buildingRepository,
             UserRepository userRepository,
-            NodeRepository nodeRepository) {
+            NodeRepository nodeRepository,
+            BuildingDownloadStatisticService buildingDownloadStatisticService) {
         this.buildingRepository = buildingRepository;
         this.userRepository = userRepository;
         this.nodeRepository = nodeRepository;
+        this.buildingDownloadStatisticService = buildingDownloadStatisticService;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -45,6 +49,7 @@ public class BuildingController {
     public ResponseEntity<List<Node>> getNodesForBuilding(@PathVariable Long id) {
         Optional<Building> building = buildingRepository.findById(id);
         if (building.isPresent()) {
+            buildingDownloadStatisticService.incrementDownloadCount(building.get());
             List<Node> nodes = nodeRepository.findByBuildingId(id);
             return ResponseEntity.ok(nodes);
         } else {
@@ -90,6 +95,8 @@ public class BuildingController {
                 foundBuilding.getId(),
                 foundBuilding.getName(),
                 foundBuilding.getUser() != null ? foundBuilding.getUser().getId() : "null");
+
+        buildingDownloadStatisticService.incrementDownloadCount(foundBuilding);
 
         Long currentUserId = getCurrentUserId();
         logger.info("Current user id: {}", currentUserId);
