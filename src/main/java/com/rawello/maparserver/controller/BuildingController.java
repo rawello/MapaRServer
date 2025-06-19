@@ -79,79 +79,61 @@ public class BuildingController {
     @GetMapping("/{id}")
     public ResponseEntity<Building> getBuildingById(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("GetBuildingById - Auth details: name={}, isAuthenticated={}, authorities={}",
-                authentication != null ? authentication.getName() : "null",
-                authentication != null ? authentication.isAuthenticated() : "null",
-                authentication != null ? authentication.getAuthorities() : "null");
+
 
         Optional<Building> building = buildingRepository.findById(id);
         if (!building.isPresent()) {
-            logger.warn("Building not found with id: {}", id);
             return ResponseEntity.notFound().build();
         }
 
         Building foundBuilding = building.get();
-        logger.info("Found building: id={}, name={}, ownerId={}",
-                foundBuilding.getId(),
-                foundBuilding.getName(),
-                foundBuilding.getUser() != null ? foundBuilding.getUser().getId() : "null");
+
 
         buildingDownloadStatisticService.incrementDownloadCount(foundBuilding);
 
         Long currentUserId = getCurrentUserId();
-        logger.info("Current user id: {}", currentUserId);
 
         if (foundBuilding.getUser() == null) {
-            logger.info("Building is public, allowing access");
             return ResponseEntity.ok(foundBuilding);
         }
 
         if (currentUserId != null && currentUserId.equals(foundBuilding.getUser().getId())) {
-            logger.info("User is owner, allowing access");
             return ResponseEntity.ok(foundBuilding);
         }
 
-        logger.warn("Access denied - User {} is not the owner of building {}", currentUserId, id);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     private boolean isCurrentUserOwner(Building building) {
         if (building == null || building.getUser() == null) {
-            logger.debug("Building or building owner is null");
             return false;
         }
 
         Long currentUserId = getCurrentUserId();
         boolean isOwner = currentUserId != null && currentUserId.equals(building.getUser().getId());
-        logger.debug("Checking ownership: currentUserId={}, buildingOwnerId={}, isOwner={}",
-                currentUserId, building.getUser().getId(), isOwner);
+
         return isOwner;
     }
 
     private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            logger.debug("No authentication found");
             return null;
         }
 
         if (!authentication.isAuthenticated()) {
-            logger.debug("User is not authenticated");
             return null;
         }
 
         if ("anonymous".equals(authentication.getName())) {
-            logger.debug("Anonymous user");
             return null;
         }
 
         User user = userRepository.findByUsername(authentication.getName());
         if (user == null) {
-            logger.warn("User not found in database: {}", authentication.getName());
             return null;
         }
 
-        logger.debug("Current user found: id={}, username={}", user.getId(), user.getUsername());
         return user.getId();
     }
 
@@ -164,32 +146,22 @@ public class BuildingController {
     @PutMapping("/{id}")
     public ResponseEntity<Building> updateBuilding(@PathVariable Long id, @RequestBody Building building) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("UpdateBuilding - Auth details: name={}, isAuthenticated={}, authorities={}",
-                authentication != null ? authentication.getName() : "null",
-                authentication != null ? authentication.isAuthenticated() : "null",
-                authentication != null ? authentication.getAuthorities() : "null");
 
         Optional<Building> existingBuilding = buildingRepository.findById(id);
         if (!existingBuilding.isPresent()) {
-            logger.warn("Building not found with id: {}", id);
             return ResponseEntity.notFound().build();
         }
 
         Building foundBuilding = existingBuilding.get();
-        logger.info("Found building to update: id={}, name={}, ownerId={}",
-                foundBuilding.getId(),
-                foundBuilding.getName(),
-                foundBuilding.getUser() != null ? foundBuilding.getUser().getId() : "null");
 
         if (!isCurrentUserOwner(foundBuilding)) {
-            logger.warn("Update denied - User is not the owner of building {}", id);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         foundBuilding.setName(building.getName());
         foundBuilding.setAddress(building.getAddress());
         Building savedBuilding = buildingRepository.save(foundBuilding);
-        logger.info("Building updated successfully: id={}", savedBuilding.getId());
+
         return ResponseEntity.ok(savedBuilding);
     }
 }

@@ -192,7 +192,6 @@
 
                 highlightSelectedNode();
 
-                // Приблизить камеру к первой точке
                 if (nodes.length > 0) {
                     const firstNodePosition = nodes[0].translation.split(',').map(parseFloat);
                     camera.position.set(firstNodePosition[0], firstNodePosition[1], firstNodePosition[2] + 20);
@@ -367,7 +366,6 @@
         document.getElementById('deleteNode').addEventListener('click', deleteNode);
         document.getElementById('createNode').addEventListener('click', createNode);
 
-        // Проверка токена при запуске
         (async function() {
             const token = localStorage.getItem('token');
             if (!token || !await validateToken(token)) {

@@ -38,9 +38,8 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 
-        // Добавляем базовые роли
         roles.add(ROLE_USER);
-        roles.add(ROLE_OWNER); // Добавляем роль владельца для всех аутентифицированных пользователей
+        roles.add(ROLE_OWNER);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("sub", userDetails.getUsername());

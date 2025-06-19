@@ -34,17 +34,14 @@ public class BuildingNodeController {
             @PathVariable Long buildingId,
             @RequestBody Node newNode) {
 
-        logger.debug("Creating new node in building {}", buildingId);
 
         Optional<Building> building = buildingRepository.findById(buildingId);
         if (!building.isPresent()) {
-            logger.warn("Building {} not found", buildingId);
             return ResponseEntity.notFound().build();
         }
 
-        // Устанавливаем обязательные значения по умолчанию
         if (newNode.getModelPath() == null) {
-            newNode.setModelPath(""); // Пустая строка вместо null
+            newNode.setModelPath("");
         }
         if (newNode.getTitle() == null) {
             newNode.setTitle("");
@@ -53,16 +50,12 @@ public class BuildingNodeController {
             newNode.setNeighbors("");
         }
 
-        // Устанавливаем связь с зданием
         newNode.setBuilding(building.get());
 
         try {
-            // Сохраняем новый узел
             Node savedNode = nodeRepository.save(newNode);
-            logger.info("Successfully created node {} in building {}", savedNode.getId(), buildingId);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedNode);
         } catch (Exception e) {
-            logger.error("Error creating node in building {}: {}", buildingId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error creating node: " + e.getMessage());
         }
@@ -74,27 +67,22 @@ public class BuildingNodeController {
             @PathVariable Long nodeId,
             @RequestBody Node nodeUpdate) {
 
-        logger.debug("Updating node {} in building {}", nodeId, buildingId);
 
         Optional<Building> building = buildingRepository.findById(buildingId);
         if (!building.isPresent()) {
-            logger.warn("Building {} not found", buildingId);
             return ResponseEntity.notFound().build();
         }
 
         Optional<Node> existingNode = nodeRepository.findById(nodeId);
         if (!existingNode.isPresent()) {
-            logger.warn("Node {} not found", nodeId);
             return ResponseEntity.notFound().build();
         }
 
         Node node = existingNode.get();
         if (!buildingId.equals(node.getBuilding().getId())) {
-            logger.warn("Node {} does not belong to building {}", nodeId, buildingId);
             return ResponseEntity.badRequest().build();
         }
 
-        // Обновляем поля узла
         node.setName(nodeUpdate.getName());
         node.setTranslation(nodeUpdate.getTranslation());
         node.setQuaternion(nodeUpdate.getQuaternion());
@@ -103,7 +91,6 @@ public class BuildingNodeController {
         node.setNeighbors(nodeUpdate.getNeighbors());
 
         Node savedNode = nodeRepository.save(node);
-        logger.info("Successfully updated node {} in building {}", nodeId, buildingId);
 
         return ResponseEntity.ok(savedNode);
     }
@@ -113,27 +100,22 @@ public class BuildingNodeController {
             @PathVariable Long buildingId,
             @PathVariable Long nodeId) {
 
-        logger.debug("Deleting node {} from building {}", nodeId, buildingId);
 
         Optional<Building> building = buildingRepository.findById(buildingId);
         if (!building.isPresent()) {
-            logger.warn("Building {} not found", buildingId);
             return ResponseEntity.notFound().build();
         }
 
         Optional<Node> node = nodeRepository.findById(nodeId);
         if (!node.isPresent()) {
-            logger.warn("Node {} not found", nodeId);
             return ResponseEntity.notFound().build();
         }
 
         if (!buildingId.equals(node.get().getBuilding().getId())) {
-            logger.warn("Node {} does not belong to building {}", nodeId, buildingId);
             return ResponseEntity.badRequest().build();
         }
 
         nodeRepository.deleteById(nodeId);
-        logger.info("Successfully deleted node {} from building {}", nodeId, buildingId);
 
         return ResponseEntity.ok().build();
     }

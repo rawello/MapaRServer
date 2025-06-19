@@ -35,7 +35,6 @@ public class SecurityConfig {
                         "/api/auth/validate"
         };
 
-        // URL patterns
         private static final String[] GET_PERMITTED_PATHS = {
                         "/buildings/**",
                         "/api/buildings/**",
@@ -75,38 +74,30 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> {
                                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                         .requestMatchers(PUBLIC_URLS).permitAll()
-                                                        // Разрешаем все GET запросы для всех путей
                                                         .requestMatchers(HttpMethod.GET, GET_PERMITTED_PATHS)
                                                         .permitAll()
 
-                                                        // PUT запросы для владельцев
                                                         .requestMatchers(HttpMethod.PUT, OWNER_PATHS)
                                                         .hasAuthority(ROLE_OWNER)
 
-                                                        // DELETE запросы для владельцев
                                                         .requestMatchers(HttpMethod.DELETE, OWNER_PATHS)
                                                         .hasAuthority(ROLE_OWNER)
 
-                                                        // POST запросы для пользователей и владельцев
                                                         .requestMatchers(HttpMethod.POST,
                                                                         "/buildings/**",
                                                                         "/api/buildings/**",
                                                                         "/api/nodes/**")
                                                         .hasAnyAuthority(ROLE_USER, ROLE_OWNER)
 
-                                                        // Специальные пути для пользователей
                                                         .requestMatchers("/api/users/favorites/**")
                                                         .hasAnyAuthority(ROLE_USER, ROLE_OWNER)
-                                                        // Пути только для админа
                                                         .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
 
                                                         .anyRequest().authenticated();
 
-                                        logger.debug("Security matchers configured - GET requests are now permitted for anonymous users");
                                 })
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                logger.debug("Security configuration completed");
                 return http.build();
         }
 
@@ -123,7 +114,7 @@ public class SecurityConfig {
                                 .userDetailsService(userDetailsService)
                                 .passwordEncoder(passwordEncoder());
                 AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
-                logger.debug("Authentication manager configured with custom UserDetailsService");
+
                 return authenticationManager;
         }
 }

@@ -6,7 +6,6 @@ public final class SecurityRoles {
     public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
 
     private SecurityRoles() {
-        // Prevent instantiation
     }
 
     public static boolean hasOwnerRole(String role) {
